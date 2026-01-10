@@ -1,4 +1,4 @@
-# 📌 n8n 기반 로그 기반 이상금융거래 대응 자동화 플랫폼
+# 📌 n8n 기반 이상금융거래 대응 자동화 플랫폼
 
 > Rule-based Scoring & Automated Financial Fraud Response using n8n
 > 
