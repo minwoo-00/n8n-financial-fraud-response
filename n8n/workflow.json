@@ -1,0 +1,768 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -880,
+        208
+      ],
+      "id": "0376881f-4820-4393-a9f6-bbf73a88190a",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "12HCnwevb48fT9fwJEXUXIwZkA97bYUTl1AU2gp48pTo",
+          "mode": "list",
+          "cachedResultName": "n8n 프로젝트 rules",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/12HCnwevb48fT9fwJEXUXIwZkA97bYUTl1AU2gp48pTo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 313461715,
+          "mode": "list",
+          "cachedResultName": "User_Risk_Status",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/12HCnwevb48fT9fwJEXUXIwZkA97bYUTl1AU2gp48pTo/edit#gid=313461715"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "User_ID",
+              "lookupValue": "={{ $('When clicking ‘Execute workflow’').item.json.user_id }}"
+            }
+          ]
+        },
+        "options": {
+          "returnFirstMatch": true
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -672,
+        288
+      ],
+      "id": "fe78e476-5c4f-4c2a-b511-82a2d30442ee",
+      "name": "user_risk_statement",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "n9ciutuxc852fbMf",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "12HCnwevb48fT9fwJEXUXIwZkA97bYUTl1AU2gp48pTo",
+          "mode": "list",
+          "cachedResultName": "n8n 프로젝트 rules",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/12HCnwevb48fT9fwJEXUXIwZkA97bYUTl1AU2gp48pTo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Rule_Set",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/12HCnwevb48fT9fwJEXUXIwZkA97bYUTl1AU2gp48pTo/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Category",
+              "lookupValue": "={{ $json.event_type }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -672,
+        144
+      ],
+      "id": "7fe3bf9e-3e92-4f59-b9f3-4654afa1bc55",
+      "name": "rule_set",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "n9ciutuxc852fbMf",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('위험도 계산').item.json.Risk_Level }}",
+                    "rightValue": "HIGH",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "6378876f-ec09-4d63-918a-12fc52512442"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "HIGH"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "8f9cebaa-0191-4a4e-bcfb-02111585310c",
+                    "leftValue": "={{ $('위험도 계산').item.json.Risk_Level }}",
+                    "rightValue": "MEDIUM",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "MEDIUM"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "7a303b6f-9d6c-4290-affd-2a77188b6eac",
+                    "leftValue": "={{ $('위험도 계산').item.json.Risk_Level }}",
+                    "rightValue": "LOW",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "LOW"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        208
+      ],
+      "id": "14b6b0c7-7efa-4cd6-a2c8-6d6aecb80e19",
+      "name": "위험도 분류"
+    },
+    {
+      "parameters": {
+        "jsCode": "const userState = $input.all().map((item) => item.json)[0];\nconst ruleSet = $(\"rule_set\")\n  .all()\n  .map((item) => item.json);\nconst logData = $(\"When clicking ‘Execute workflow’\")\n  .all()\n  .map((item) => item.json)[0];\n\nlet totalScore = userState.Current_Total_Score;\nlet triggeredRules = []\ntriggeredRules.push(userState.Triggered_Rules);\n\nruleSet.forEach((rule) => {\n  if (\n    rule.Rule_ID === \"R001\" &&\n    rule.Is_Active &&\n    logData[rule.Target_Field] &&\n    logData[rule.Target_Field] != rule.Threshold\n  ) {\n    totalScore += rule.Score;\n    triggeredRules.push(rule.Rule_Name);\n  }\n  if (\n    rule.Rule_ID === \"R002\" &&\n    rule.Is_Active &&\n    logData[rule.Target_Field] &&\n    logData[rule.Target_Field] >= rule.Threshold\n  ) {\n    totalScore += rule.Score;\n    triggeredRules.push(rule.Rule_Name);\n  }\n  if (\n    rule.Rule_ID === \"R003\" &&\n    rule.Is_Active &&\n    logData[rule.Target_Field] &&\n    logData[rule.Target_Field] >= rule.Threshold[0] &&\n    logData[rule.Target_Field] <= rule.Threshold[1]\n  ) {\n    totalScore += rule.Score;\n    triggeredRules.push(rule.Rule_Name);\n  }\n  // if (  tx_count 필드 추가하기(redis로 계산)\n  //   rule.Rule_ID === \"R004\" &&\n  //   rule.Is_Active &&\n  //   logData[rule.Target_Field] &&\n  //   rule.Operator === \">=\" &&\n  //   logData[rule.Target_Field] >= rule.Threshold\n  // ) {\n  //   totalScore += rule.Score;\n  //   triggeredRules.push(rule.Rule_ID);\n  // }\n});\n\nlet riskLevel = \"NONE\";\nif (totalScore >= 70) {\n  riskLevel = \"HIGH\";\n} else if (totalScore >= 40) {\n  riskLevel = \"MEDIUM\";\n} else if (totalScore > 0){\n  riskLevel = \"LOW\";\n}\n\nconst updatedUserRiskStatement = {\n  ...userState,\n  Current_Total_Score: totalScore,\n  Last_Update_Time: logData.ts,\n  Triggered_Rules: triggeredRules.join(\", \"),\n  Risk_Level: riskLevel,\n  Category: logData.event_type\n};\n\nreturn [{ json: updatedUserRiskStatement }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -432,
+        208
+      ],
+      "id": "5de079a0-607c-418d-afca-501747e73020",
+      "name": "위험도 계산"
+    },
+    {
+      "parameters": {
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "value": "https://app.slack.com/client/T0A420HQNJE/C0A7XUAEPL3",
+          "mode": "url"
+        },
+        "text": "=현재 비정상적인 금융 거래가 탐지되었습니다.\nLast_Update_Time : {{ $json.Last_Update_Time }}\nRisk_Level : {{ $('위험도 계산').item.json.Risk_Level }}\nTriggered_Rules : {{ $json.Triggered_Rules }}",
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        432,
+        -48
+      ],
+      "id": "4e9e3792-082b-41ca-8688-0e3d569d2efd",
+      "name": "관리자 알림",
+      "webhookId": "7dfce69f-e0e9-47c2-af2c-0789de1a4af0",
+      "credentials": {
+        "slackApi": {
+          "id": "KaOSQxMzQktNKHtE",
+          "name": "Slack account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "809ee093-3630-4d02-8be4-dc93ce142f22",
+              "leftValue": "={{ $json.Category }}",
+              "rightValue": "LOGOUT",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -256,
+        208
+      ],
+      "id": "fb2fd1f5-7e8b-4002-bd57-af43304b580c",
+      "name": "Logout"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/12HCnwevb48fT9fwJEXUXIwZkA97bYUTl1AU2gp48pTo/edit?gid=313461715#gid=313461715",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 313461715,
+          "mode": "list",
+          "cachedResultName": "User_Risk_Status",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/12HCnwevb48fT9fwJEXUXIwZkA97bYUTl1AU2gp48pTo/edit#gid=313461715"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "User_ID": "={{ $('위험도 계산').item.json.User_ID }}",
+            "Current_Total_Score": "=0",
+            "Last_Update_Time": "={{ $('위험도 계산').item.json.Last_Update_Time }}",
+            "Triggered_Rules": "="
+          },
+          "matchingColumns": [
+            "User_ID"
+          ],
+          "schema": [
+            {
+              "id": "User_ID",
+              "displayName": "User_ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Current_Total_Score",
+              "displayName": "Current_Total_Score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Last_Update_Time",
+              "displayName": "Last_Update_Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Triggered_Rules",
+              "displayName": "Triggered_Rules",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -64,
+        -32
+      ],
+      "id": "0819d051-7d74-4f36-843f-ff6ad0e2528e",
+      "name": "user_risk_reset",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "n9ciutuxc852fbMf",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/12HCnwevb48fT9fwJEXUXIwZkA97bYUTl1AU2gp48pTo/edit?gid=313461715#gid=313461715",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 313461715,
+          "mode": "list",
+          "cachedResultName": "User_Risk_Status",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/12HCnwevb48fT9fwJEXUXIwZkA97bYUTl1AU2gp48pTo/edit#gid=313461715"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "User_ID": "={{ $('위험도 계산').item.json.User_ID }}",
+            "Current_Total_Score": "={{ $('위험도 계산').item.json.Current_Total_Score }}",
+            "Last_Update_Time": "={{ $('위험도 계산').item.json.Last_Update_Time }}",
+            "Triggered_Rules": "={{ $('위험도 계산').item.json.Triggered_Rules }}"
+          },
+          "matchingColumns": [
+            "User_ID"
+          ],
+          "schema": [
+            {
+              "id": "User_ID",
+              "displayName": "User_ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Current_Total_Score",
+              "displayName": "Current_Total_Score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Last_Update_Time",
+              "displayName": "Last_Update_Time",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Triggered_Rules",
+              "displayName": "Triggered_Rules",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -48,
+        224
+      ],
+      "id": "f73e533a-bcb3-4e72-ad7e-f24df9ffd7ad",
+      "name": "user_risk_update",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "n9ciutuxc852fbMf",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "schema": {
+          "__rl": true,
+          "value": "SCOTT",
+          "mode": "list",
+          "cachedResultName": "SCOTT"
+        },
+        "table": {
+          "__rl": true,
+          "value": "LOGS",
+          "mode": "list",
+          "cachedResultName": "LOGS"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "EVENT_HOUR": "={{ $('When clicking ‘Execute workflow’').item.json.hour }}",
+            "AMOUNT": "={{ $('When clicking ‘Execute workflow’').item.json.amount }}",
+            "USER_ID": "={{ $('When clicking ‘Execute workflow’').item.json.user_id }}",
+            "TS": "={{ $('When clicking ‘Execute workflow’').item.json.ts }}",
+            "EVENT_TYPE": "={{ $('When clicking ‘Execute workflow’').item.json.event_type }}",
+            "SRC_IP": "={{ $('When clicking ‘Execute workflow’').item.json.src_ip }}",
+            "EVENT_RESULT": "={{ $('When clicking ‘Execute workflow’').item.json.result }}",
+            "EVENT_ID": "={{ $('When clicking ‘Execute workflow’').item.json.event_id }}",
+            "COUNTRY": "={{ $('When clicking ‘Execute workflow’').item.json.country }}",
+            "TO_BANK": "={{ $('When clicking ‘Execute workflow’').item.json.to_bank }}",
+            "TO_ACCOUNT_ID": "={{ $('When clicking ‘Execute workflow’').item.json.to_account_id }}"
+          },
+          "matchingColumns": [
+            "AMOUNT",
+            "COUNTRY",
+            "EVENT_HOUR",
+            "EVENT_ID",
+            "EVENT_RESULT",
+            "EVENT_TYPE",
+            "LOG_ID",
+            "SRC_IP",
+            "TO_ACCOUNT_ID",
+            "TO_BANK",
+            "TS",
+            "USER_ID"
+          ],
+          "schema": [
+            {
+              "id": "AMOUNT",
+              "displayName": "AMOUNT",
+              "required": false,
+              "display": true,
+              "type": "number",
+              "defaultMatch": true,
+              "removed": false
+            },
+            {
+              "id": "COUNTRY",
+              "displayName": "COUNTRY",
+              "required": true,
+              "display": true,
+              "type": "string",
+              "defaultMatch": true,
+              "removed": false
+            },
+            {
+              "id": "EVENT_HOUR",
+              "displayName": "EVENT_HOUR",
+              "required": true,
+              "display": true,
+              "type": "number",
+              "defaultMatch": true,
+              "removed": false
+            },
+            {
+              "id": "EVENT_ID",
+              "displayName": "EVENT_ID",
+              "required": true,
+              "display": true,
+              "type": "string",
+              "defaultMatch": true,
+              "removed": false
+            },
+            {
+              "id": "EVENT_RESULT",
+              "displayName": "EVENT_RESULT",
+              "required": true,
+              "display": true,
+              "type": "string",
+              "defaultMatch": true,
+              "removed": false
+            },
+            {
+              "id": "EVENT_TYPE",
+              "displayName": "EVENT_TYPE",
+              "required": true,
+              "display": true,
+              "type": "string",
+              "defaultMatch": true,
+              "removed": false
+            },
+            {
+              "id": "LOG_ID",
+              "displayName": "LOG_ID",
+              "required": false,
+              "display": true,
+              "type": "number",
+              "defaultMatch": true,
+              "removed": true
+            },
+            {
+              "id": "SRC_IP",
+              "displayName": "SRC_IP",
+              "required": true,
+              "display": true,
+              "type": "string",
+              "defaultMatch": true,
+              "removed": false
+            },
+            {
+              "id": "TO_ACCOUNT_ID",
+              "displayName": "TO_ACCOUNT_ID",
+              "required": false,
+              "display": true,
+              "type": "string",
+              "defaultMatch": true,
+              "removed": false
+            },
+            {
+              "id": "TO_BANK",
+              "displayName": "TO_BANK",
+              "required": false,
+              "display": true,
+              "type": "string",
+              "defaultMatch": true,
+              "removed": false
+            },
+            {
+              "id": "TS",
+              "displayName": "TS",
+              "required": true,
+              "display": true,
+              "type": "dateTime",
+              "defaultMatch": true,
+              "removed": false
+            },
+            {
+              "id": "USER_ID",
+              "displayName": "USER_ID",
+              "required": true,
+              "display": true,
+              "type": "string",
+              "defaultMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.oracleDatabase",
+      "typeVersion": 1,
+      "position": [
+        592,
+        528
+      ],
+      "id": "f70a95b9-d726-45b7-85bc-1a96fd7c1f08",
+      "name": "이상로그저장",
+      "credentials": {
+        "oracleDBApi": {
+          "id": "ZONPHcOP3OPnxyR1",
+          "name": "Oracle Database Credentials account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "When clicking ‘Execute workflow’": [
+      {
+        "json": {
+          "ts": "2026-01-11T18:06:30+09:00",
+          "event_type": "TRANSFER",
+          "event_id": "0c0f6e5c-0f7c-4b3d-8f2f-8b8df7a4b9d1",
+          "user_id": "user_01",
+          "result": "SUCCESS",
+          "src_ip": "203.0.113.10",
+          "country": "US",
+          "hour": 18,
+          "amount": 5500000,
+          "to_bank": "Woori",
+          "to_account_id": "110-***-1234"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "rule_set",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "user_risk_statement",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "user_risk_statement": {
+      "main": [
+        [
+          {
+            "node": "위험도 계산",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "rule_set": {
+      "main": [
+        [
+          {
+            "node": "위험도 계산",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "위험도 계산": {
+      "main": [
+        [
+          {
+            "node": "Logout",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "위험도 분류": {
+      "main": [
+        [
+          {
+            "node": "관리자 알림",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "이상로그저장",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "이상로그저장",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "이상로그저장",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Logout": {
+      "main": [
+        [
+          {
+            "node": "user_risk_reset",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "user_risk_update",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "user_risk_update": {
+      "main": [
+        [
+          {
+            "node": "위험도 분류",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "b5a86b4c-4083-4830-a148-3e27127d094e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9834082e2082ff3192fd06a958e5381173c15c4af883913e9e1be0b3c1e63e50"
+  },
+  "id": "ADaKMgthQ1-_pQUbf6ZCq",
+  "tags": []
+}
