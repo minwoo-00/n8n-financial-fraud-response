@@ -6,8 +6,8 @@
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        -880,
-        208
+        -1600,
+        240
       ],
       "id": "0376881f-4820-4393-a9f6-bbf73a88190a",
       "name": "When clicking ‘Execute workflow’"
@@ -75,7 +75,7 @@
           "values": [
             {
               "lookupColumn": "Category",
-              "lookupValue": "={{ $json.event_type }}"
+              "lookupValue": "={{ $('When clicking ‘Execute workflow’').item.json.event_type }}"
             }
           ]
         },
@@ -179,7 +179,7 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.4,
       "position": [
-        208,
+        176,
         208
       ],
       "id": "14b6b0c7-7efa-4cd6-a2c8-6d6aecb80e19",
@@ -187,7 +187,7 @@
     },
     {
       "parameters": {
-        "jsCode": "const userState = $input.all().map((item) => item.json)[0];\nconst ruleSet = $(\"rule_set\")\n  .all()\n  .map((item) => item.json);\nconst logData = $(\"When clicking ‘Execute workflow’\")\n  .all()\n  .map((item) => item.json)[0];\n\nlet totalScore = userState.Current_Total_Score;\nlet triggeredRules = []\ntriggeredRules.push(userState.Triggered_Rules);\n\nruleSet.forEach((rule) => {\n  if (\n    rule.Rule_ID === \"R001\" &&\n    rule.Is_Active &&\n    logData[rule.Target_Field] &&\n    logData[rule.Target_Field] != rule.Threshold\n  ) {\n    totalScore += rule.Score;\n    triggeredRules.push(rule.Rule_Name);\n  }\n  if (\n    rule.Rule_ID === \"R002\" &&\n    rule.Is_Active &&\n    logData[rule.Target_Field] &&\n    logData[rule.Target_Field] >= rule.Threshold\n  ) {\n    totalScore += rule.Score;\n    triggeredRules.push(rule.Rule_Name);\n  }\n  if (\n    rule.Rule_ID === \"R003\" &&\n    rule.Is_Active &&\n    logData[rule.Target_Field] &&\n    logData[rule.Target_Field] >= rule.Threshold[0] &&\n    logData[rule.Target_Field] <= rule.Threshold[1]\n  ) {\n    totalScore += rule.Score;\n    triggeredRules.push(rule.Rule_Name);\n  }\n  // if (  tx_count 필드 추가하기(redis로 계산)\n  //   rule.Rule_ID === \"R004\" &&\n  //   rule.Is_Active &&\n  //   logData[rule.Target_Field] &&\n  //   rule.Operator === \">=\" &&\n  //   logData[rule.Target_Field] >= rule.Threshold\n  // ) {\n  //   totalScore += rule.Score;\n  //   triggeredRules.push(rule.Rule_ID);\n  // }\n});\n\nlet riskLevel = \"NONE\";\nif (totalScore >= 70) {\n  riskLevel = \"HIGH\";\n} else if (totalScore >= 40) {\n  riskLevel = \"MEDIUM\";\n} else if (totalScore > 0){\n  riskLevel = \"LOW\";\n}\n\nconst updatedUserRiskStatement = {\n  ...userState,\n  Current_Total_Score: totalScore,\n  Last_Update_Time: logData.ts,\n  Triggered_Rules: triggeredRules.join(\", \"),\n  Risk_Level: riskLevel,\n  Category: logData.event_type\n};\n\nreturn [{ json: updatedUserRiskStatement }];\n"
+        "jsCode": "const userState = $input.all().map((item) => item.json)[0];\nconst ruleSet = $(\"rule_set\")\n  .all()\n  .map((item) => item.json);\nconst logData = $(\"When clicking ‘Execute workflow’\")\n  .all()\n  .map((item) => item.json)[0];\n// const transfer_count = $(\"get_tx_count\")\n//   .all()\n//   .map((item) => item.json)[0];\n\nlet totalScore = userState.Current_Total_Score;\nlet triggeredRules = []\ntriggeredRules.push(userState.Triggered_Rules);\n\nruleSet.forEach((rule) => {\n  if (\n    rule.Rule_ID === \"R001\" &&\n    rule.Is_Active &&\n    logData[rule.Target_Field] &&\n    logData[rule.Target_Field] != rule.Threshold\n  ) {\n    totalScore += rule.Score;\n    triggeredRules.push(rule.Rule_Name);\n  }\n  if (\n    rule.Rule_ID === \"R002\" &&\n    rule.Is_Active &&\n    logData[rule.Target_Field] &&\n    logData[rule.Target_Field] >= rule.Threshold\n  ) {\n    totalScore += rule.Score;\n    triggeredRules.push(rule.Rule_Name);\n  }\n  if (\n    rule.Rule_ID === \"R003\" &&\n    rule.Is_Active &&\n    logData[rule.Target_Field] &&\n    logData[rule.Target_Field] >= 0 &&\n    logData[rule.Target_Field] <= 5\n  ) {\n    totalScore += rule.Score;\n    triggeredRules.push(rule.Rule_Name);\n  }\n  \n  if (\n    rule.Rule_ID === \"R004\" &&\n    rule.Is_Active &&\n    //logData[rule.Target_Field] &&\n    rule.Operator === \">\" &&\n    $('get_tx_count').first().json.tx_count > rule.Threshold\n  ) {\n    totalScore += rule.Score;\n    triggeredRules.push(rule.Rule_Name);\n  }\n});\n\nlet riskLevel = \"NONE\";\nif (totalScore >= 70) {\n  riskLevel = \"HIGH\";\n} else if (totalScore >= 40) {\n  riskLevel = \"MEDIUM\";\n} else if (totalScore > 0){\n  riskLevel = \"LOW\";\n}\n\nconst updatedUserRiskStatement = {\n  ...userState,\n  Current_Total_Score: totalScore,\n  Last_Update_Time: logData.ts,\n  Triggered_Rules: triggeredRules.join(\", \"),\n  Risk_Level: riskLevel,\n  Category: logData.event_type\n};\n\nreturn [{ json: updatedUserRiskStatement }];\n"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
@@ -611,8 +611,8 @@
       "type": "n8n-nodes-base.oracleDatabase",
       "typeVersion": 1,
       "position": [
-        592,
-        528
+        560,
+        560
       ],
       "id": "f70a95b9-d726-45b7-85bc-1a96fd7c1f08",
       "name": "이상로그저장",
@@ -622,23 +622,139 @@
           "name": "Oracle Database Credentials account"
         }
       }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "c49735d5-9ffb-4d5e-89eb-535946206fc7",
+              "leftValue": "={{ $json.event_type }}",
+              "rightValue": "TRANSFER",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -1392,
+        240
+      ],
+      "id": "75ca4ede-0560-4203-b100-41ef92dc8fe8",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "push",
+        "list": "=log_transfer_{{ $json.user_id }}",
+        "messageData": "={{ $json.event_id }}, {{ $json.ts }}, {{ $json.result }}, {{ $json.amount }}"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -1200,
+        128
+      ],
+      "id": "0681a3a2-1d2c-4e8f-a598-3cd59650a607",
+      "name": "전송횟수저장",
+      "alwaysOutputData": false,
+      "executeOnce": false,
+      "credentials": {
+        "redis": {
+          "id": "D1pywVJc3yOZPlo8",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "llen",
+        "list": "=log_transfer_{{ $json.user_id }}"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -1056,
+        224
+      ],
+      "id": "143c694d-6cd7-47dc-8897-5599fe425870",
+      "name": "전송횟수조회",
+      "credentials": {
+        "redis": {
+          "id": "D1pywVJc3yOZPlo8",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "760fe8a5-41f2-4728-8998-4d85d78441c0",
+              "name": "tx_count",
+              "value": "={{ $json.log_transfer_user_01 }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -880,
+        224
+      ],
+      "id": "2a6cd0c0-e5c6-4d87-bcec-2a70a708e7ba",
+      "name": "get_tx_count"
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "key": "=log_transfer_{{ $('When clicking ‘Execute workflow’').item.json.user_id }}"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        96,
+        -32
+      ],
+      "id": "504c9284-21ae-40c1-b8b8-96f4d5da1687",
+      "name": "tx_count 초기화",
+      "credentials": {
+        "redis": {
+          "id": "D1pywVJc3yOZPlo8",
+          "name": "Redis account"
+        }
+      }
     }
   ],
   "pinData": {
     "When clicking ‘Execute workflow’": [
       {
         "json": {
-          "ts": "2026-01-11T18:06:30+09:00",
-          "event_type": "TRANSFER",
-          "event_id": "0c0f6e5c-0f7c-4b3d-8f2f-8b8df7a4b9d1",
+          "ts": "2026-01-11T18:01:10+09:00",
+          "event_type": "LOGOUT",
+          "event_id": "e5b9f9b2-3c4e-4ed2-a1c8-0d4f4c3d1bbc",
           "user_id": "user_01",
           "result": "SUCCESS",
           "src_ip": "203.0.113.10",
           "country": "US",
-          "hour": 18,
-          "amount": 5500000,
-          "to_bank": "Woori",
-          "to_account_id": "110-***-1234"
+          "hour": 18
         }
       }
     ]
@@ -648,12 +764,7 @@
       "main": [
         [
           {
-            "node": "rule_set",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "user_risk_statement",
+            "node": "If",
             "type": "main",
             "index": 0
           }
@@ -751,6 +862,73 @@
           }
         ]
       ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "전송횟수저장",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "전송횟수조회",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "user_risk_reset": {
+      "main": [
+        [
+          {
+            "node": "tx_count 초기화",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "전송횟수저장": {
+      "main": [
+        [
+          {
+            "node": "전송횟수조회",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "전송횟수조회": {
+      "main": [
+        [
+          {
+            "node": "get_tx_count",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get_tx_count": {
+      "main": [
+        [
+          {
+            "node": "rule_set",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "user_risk_statement",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
@@ -758,7 +936,7 @@
     "executionOrder": "v1",
     "availableInMCP": false
   },
-  "versionId": "b5a86b4c-4083-4830-a148-3e27127d094e",
+  "versionId": "d0cab3ac-faa0-42a3-8a30-79482079ab09",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "9834082e2082ff3192fd06a958e5381173c15c4af883913e9e1be0b3c1e63e50"
