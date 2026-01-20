@@ -15,26 +15,36 @@ public class AuthController {
 
     @PostMapping("/login")
     public String login(
-            @RequestBody LoginRequest request
+            @RequestBody LoginRequest request,
+            HttpServletRequest httpRequest
     ) {
-        authService.login(
-                request.userId(),
-                request.country()
-        );
+        String result = authService.login(
+                    request.userId(),
+                    request.password(),
+                    request.country(),
+                    httpRequest
+                );
 
-        return "LOGIN_SUCCESS";
+        if (result.equals("BLOCKED")) {
+            return "LOGIN_BLOCKED - 의심스러운 활동으로 인해 계정이 차단되었습니다.";
+        }
+
+        return result.equals("SUCCESS") ? "LOGIN_SUCCESS" : "LOGIN_FAILURE";
     }
 
     @PostMapping("/logout")
     public String logout(
-            @RequestBody LoginRequest request
+            @RequestBody LoginRequest request,
+            HttpServletRequest httpRequest
     ) {
-        authService.logout(
-                request.userId(),
-                request.country()
-        );
+        String result = authService.logout(
+                        request.userId(),
+                        request.country(),
+                        httpRequest
+                    );
 
-        return "LOGOUT_SUCCESS";
+        return result.equals("SUCCESS") ? "LOGOUT_SUCCESS" : "LOGOUT_FAILURE";
     }
+
 }
 
