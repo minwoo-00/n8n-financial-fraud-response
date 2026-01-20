@@ -16,6 +16,8 @@
     <div class="background-layer-3"></div>
     <div class="noise-overlay"></div>
 
+    <div id="auth-state" data-authenticated="false"></div>
+
     <div class="container">
         <header class="header">
             <div class="header-content">
@@ -25,9 +27,10 @@
                 </div>
                 <nav class="nav">
                     <button class="nav-btn active" data-section="login">Login</button>
-                    <button class="nav-btn" data-section="transfer">Transfer</button>
-                    <button class="nav-btn" data-section="logout">Logout</button>
+                    <button class="nav-btn disabled" data-section="transfer" disabled>Transfer</button>
+                    <button class="nav-btn disabled" data-section="logout" disabled>Logout</button>
                 </nav>
+                <div id="current-user" class="current-user"></div>
             </div>
         </header>
 
@@ -60,6 +63,7 @@
                         </div>
                         <button type="submit" class="form-submit">Sign In</button>
                     </form>
+                    <p class="helper-text">Sign in to unlock Transfer and Logout features</p>
                     <div id="login-status" class="status" role="status"></div>
                 </div>
             </section>
@@ -71,21 +75,6 @@
                         <p class="section-subtitle">Send funds with confidence</p>
                     </div>
                     <form id="transfer-form" class="form" action="/transfer" method="POST">
-                        <div class="form-group">
-                            <label for="transfer-userId" class="form-label">User ID</label>
-                            <input type="text" id="transfer-userId" name="userId" class="form-input" placeholder="Enter your user ID" required autocomplete="off">
-                        </div>
-                        <div class="form-group">
-                            <label for="transfer-country" class="form-label">Country</label>
-                            <select id="transfer-country" name="country" class="form-select" required>
-                                <option value="">Select your country</option>
-                                <option value="KR">South Korea</option>
-                                <option value="US">United States</option>
-                                <option value="GB">United Kingdom</option>
-                                <option value="JP">Japan</option>
-                                <option value="SG">Singapore</option>
-                            </select>
-                        </div>
                         <div class="form-group">
                             <label for="transfer-amount" class="form-label">Transfer Amount</label>
                             <div class="input-wrapper">
@@ -106,21 +95,6 @@
                         <p class="section-subtitle">Safely end your session</p>
                     </div>
                     <form id="logout-form" class="form" action="/auth/logout" method="POST">
-                        <div class="form-group">
-                            <label for="logout-userId" class="form-label">User ID</label>
-                            <input type="text" id="logout-userId" name="userId" class="form-input" placeholder="Enter your user ID" required autocomplete="off">
-                        </div>
-                        <div class="form-group">
-                            <label for="logout-country" class="form-label">Country</label>
-                            <select id="logout-country" name="country" class="form-select" required>
-                                <option value="">Select your country</option>
-                                <option value="KR">South Korea</option>
-                                <option value="US">United States</option>
-                                <option value="GB">United Kingdom</option>
-                                <option value="JP">Japan</option>
-                                <option value="SG">Singapore</option>
-                            </select>
-                        </div>
                         <button type="submit" class="form-submit form-submit--danger">Sign Out</button>
                     </form>
                     <div id="logout-status" class="status" role="status"></div>
