@@ -50,16 +50,16 @@ public class AuthService {
         User user = USERS.get(userId);
         if (user == null) {
             log.warn("LOGIN_FAILURE userId={} reason=USER_NOT_FOUND", userId);
-            FdsEvent event = createAuthEvent("LOGIN", userId, normalizedCountry, srcIp, RESULT_FAILURE);
-            eventSender.send(event);
+            // FdsEvent event = createAuthEvent("LOGIN", userId, normalizedCountry, srcIp, RESULT_FAILURE);
+            // eventSender.send(event);  // ← 이 두 줄 삭제 또는 주석 처리
             return RESULT_FAILURE;
         }
 
         // 비밀번호 검증
         if (!user.getPassword().equals(password)) {
             log.warn("LOGIN_FAILURE userId={} reason=INVALID_PASSWORD", userId);
-            FdsEvent event = createAuthEvent("LOGIN", userId, normalizedCountry, srcIp, RESULT_FAILURE);
-            eventSender.send(event);
+            // FdsEvent event = createAuthEvent("LOGIN", userId, normalizedCountry, srcIp, RESULT_FAILURE);
+            // eventSender.send(event);  // ← 이 두 줄 삭제 또는 주석 처리
             return RESULT_FAILURE;
         }
 
@@ -88,13 +88,14 @@ public class AuthService {
             return "BLOCKED";
         }
 
-        // MEDIUM: 추가 인증 필요 (blocked 상태는 변경하지 않음)
+        // MEDIUM: 로그인 허용하되 경고 로그만 남김
         if ("MEDIUM".equals(riskLevel)) {
-            log.warn("LOGIN_VERIFICATION_REQUIRED userId={} country={} srcIp={} riskLevel=MEDIUM",
+            log.warn("LOGIN_SUCCESS_WITH_MEDIUM_RISK userId={} country={} srcIp={} riskLevel=MEDIUM",
                     userId, normalizedCountry, srcIp);
-            FdsEvent event = createAuthEvent("LOGIN", userId, normalizedCountry, srcIp, "VERIFICATION_REQUIRED");
+            // MEDIUM이어도 로그인 성공 처리하고 이벤트 전송
+            FdsEvent event = createAuthEvent("LOGIN", userId, normalizedCountry, srcIp, RESULT_SUCCESS);
             eventSender.send(event);
-            return "VERIFICATION_REQUIRED";
+            return RESULT_SUCCESS;
         }
 
         // LOW: 로그인 성공

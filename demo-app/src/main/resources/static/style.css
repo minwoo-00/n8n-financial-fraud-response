@@ -444,6 +444,13 @@ body {
     color: var(--color-gold);
 }
 
+.status.login-failure {
+    background: rgba(231, 76, 60, 0.15);
+    border: 2px solid var(--color-error);
+    color: var(--color-error);
+    font-weight: 600;
+}
+
 .helper-text {
     font-size: 0.8125rem;
     color: var(--color-text-muted);

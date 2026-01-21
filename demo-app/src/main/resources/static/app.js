@@ -288,11 +288,46 @@ loginForm?.addEventListener('submit', async (event) => {
         country,
     };
 
-    const result = await sendRequest('/auth/login', payload, loginStatus);
-    if (result.success) {
-        setAuthState({ userId, country });
-        updateNavAvailability(true);
-        setActiveSection('transfer');
+    // 상태 초기화
+    loginStatus.classList.remove('success', 'error', 'info', 'login-failure');
+    loginStatus.textContent = 'Processing request...';
+    loginStatus.classList.add('visible', 'info');
+
+    try {
+        const response = await fetch('/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+        });
+
+        const responseText = await response.text();
+
+        if (responseText === 'LOGIN_SUCCESS') {
+            loginStatus.classList.remove('info');
+            loginStatus.classList.add('success');
+            loginStatus.textContent = 'LOGIN_SUCCESS';
+            setAuthState({ userId, country });
+            updateNavAvailability(true);
+            setActiveSection('transfer');
+        } else if (responseText === 'LOGIN_FAILURE') {
+            loginStatus.classList.remove('info', 'success', 'error');
+            loginStatus.classList.add('login-failure', 'visible');
+            loginStatus.textContent = 'LOGIN_FAILURE';
+        } else if (responseText.includes('BLOCKED')) {
+            loginStatus.classList.remove('info', 'success');
+            loginStatus.classList.add('error');
+            loginStatus.textContent = '계정이 차단되었습니다.';
+        } else {
+            loginStatus.classList.remove('info');
+            loginStatus.classList.add('error');
+            loginStatus.textContent = responseText || 'Login failed';
+        }
+    } catch (error) {
+        loginStatus.classList.remove('info');
+        loginStatus.classList.add('error');
+        loginStatus.textContent = error.message || 'Login failed';
     }
 });
 
