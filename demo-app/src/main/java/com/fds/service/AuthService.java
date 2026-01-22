@@ -5,6 +5,9 @@ import com.fds.dto.User;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
 
 import java.time.ZonedDateTime;
@@ -19,6 +22,8 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 @RequiredArgsConstructor
 public class AuthService {
+
+    private static final Logger elkLog = LoggerFactory.getLogger("ELK_LOGIN");
 
     private static final String RESULT_SUCCESS = "SUCCESS";
     private static final String RESULT_FAILURE = "FAILURE";
@@ -39,7 +44,7 @@ public class AuthService {
     );
 
     private final EventSender eventSender;
-    private final GoogleSheetsService googleSheetsService;  // ← 추가!
+    private final GoogleSheetsService googleSheetsService;
 
     public String login(String userId, String password, String country, HttpServletRequest request) {
         String normalizedCountry = normalizeCountry(country);
@@ -87,9 +92,19 @@ public class AuthService {
                     userId, normalizedCountry, srcIp);
         }
 
-        // LOW 또는 MEDIUM: 로그인 성공
-        log.info("LOGIN_SUCCESS userId={} country={} srcIp={} timestamp={} riskLevel={}",
-                userId, normalizedCountry, srcIp, now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME), riskLevel);
+        // 로그인 성공 시에만 ELK 로그
+        try {
+            MDC.put("eventType", "LOGIN");
+            MDC.put("userId", userId);
+            MDC.put("country", normalizedCountry);
+            MDC.put("srcIp", srcIp);
+            MDC.put("riskLevel", riskLevel);
+            MDC.put("timestamp", now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
+
+            elkLog.info("LOGIN_SUCCESS");
+        } finally {
+            MDC.clear();
+        }
 
         FdsEvent event = createAuthEvent("LOGIN", userId, normalizedCountry, srcIp, RESULT_SUCCESS);
         eventSender.send(event);
@@ -152,7 +167,8 @@ public class AuthService {
                 now.getHour(),
                 null,
                 null,
-                null
+                null,
+                0.0
         );
     }
 

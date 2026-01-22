@@ -109,7 +109,6 @@ public class GoogleSheetsService {
     }
 
     //사용자를 차단 상태로 변경 E열에 blocked 값을 TRUE로 설정
-
     public void blockUser(String userId) {
         try {
             ValueRange response = sheetsService.spreadsheets().values()

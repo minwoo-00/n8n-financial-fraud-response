@@ -25,10 +25,20 @@ public class TransferController {
             @RequestParam(required = false, defaultValue = "false") Boolean verified,
             HttpServletRequest request
     ) {
-        log.info("Transfer request: userId={}, amount={}, country={}, verified={}",
-                userId, amount, country, verified);
+        log.info("=== TRANSFER REQUEST START ===");
+        log.info("userId: {}", userId);
+        log.info("amount: {}", amount);
+        log.info("country: {}", country);
+        log.info("verified: {}", verified);
 
-        Map<String, Object> result = transferService.processTransfer(userId, amount, country, verified, request);
+        // 당일 평균 계산
+        double avgAmount = transferService.getTodayAverageAmount(userId);
+        log.info("Today's average amount for {}: {}", userId, avgAmount);
+
+        Map<String, Object> result = transferService.processTransfer(userId, amount, country, verified, request, avgAmount);
+
+        log.info("=== TRANSFER RESULT ===");
+        log.info("result: {}", result);
 
         return ResponseEntity.ok(result);
     }
@@ -39,13 +49,26 @@ public class TransferController {
             @RequestBody TransferRequest req,
             HttpServletRequest httpRequest
     ) {
-        transferService.processTransfer(
+        log.info("=== LEGACY TRANSFER REQUEST ===");
+        log.info("userId: {}", req.userId());
+        log.info("amount: {}", req.amount());
+        log.info("country: {}", req.country());
+
+        // 당일 평균 계산
+        double avgAmount = transferService.getTodayAverageAmount(req.userId());
+        log.info("Today's average amount for {}: {}", req.userId(), avgAmount);
+
+        Map<String, Object> result = transferService.processTransfer(
                 req.userId(),
                 req.amount(),
                 req.country(),
                 false,
-                httpRequest
+                httpRequest,
+                avgAmount
         );
+
+        log.info("=== LEGACY TRANSFER RESULT ===");
+        log.info("result: {}", result);
 
         return "TRANSFER_REQUESTED";
     }

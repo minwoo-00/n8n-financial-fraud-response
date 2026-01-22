@@ -1,23 +1,32 @@
 package com.fds.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fds.dto.FdsEvent;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Locale;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class TransferService {
+
+    private static final Logger elkLog = LoggerFactory.getLogger("ELK_LOGIN");
 
     private static final String RESULT_SUCCESS = "SUCCESS";
     private static final String RESULT_VERIFICATION_REQUIRED = "VERIFICATION_REQUIRED";
@@ -35,8 +44,122 @@ public class TransferService {
     private final EventSender eventSender;
     private final StringRedisTemplate redisTemplate;
     private final GoogleSheetsService googleSheetsService;
+    private final ObjectMapper objectMapper;
+    private static final String LOG_DIR = "logs";
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
-    public Map<String, Object> processTransfer(String userId, Long amount, String country, Boolean verified, HttpServletRequest request) {
+    public double getTodayAverageAmount(String userId) {
+        String today = LocalDate.now().format(DATE_FORMATTER);
+        String logFileName = LOG_DIR + "/fds-" + today + ".json";
+
+        File logFile = new File(logFileName);
+        if (!logFile.exists()) {
+            log.warn("Log file not found: {}", logFileName);
+            return getRecentAverageAmount(userId);
+        }
+
+        List<Double> amounts = new ArrayList<>();
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(logFile))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                try {
+                    JsonNode node = objectMapper.readTree(line);
+
+                    if ("TRANSFER".equals(node.path("eventType").asText()) &&
+                            userId.equals(node.path("userId").asText())) {
+
+                        String amountStr = node.path("amount").asText();
+                        log.info("Found amount string: {}", amountStr);
+                        if (!amountStr.isEmpty()) {
+                            double amount = Double.parseDouble(amountStr);
+                            log.info("Parsed amount: {}", amount);
+                            amounts.add(amount);
+                        }
+                    }
+                } catch (Exception e) {
+                    log.debug("Failed to parse log line: {}", line);
+                }
+            }
+        } catch (Exception e) {
+            log.error("Error reading log file: {}", logFileName, e);
+            return getRecentAverageAmount(userId);
+        }
+
+        if (amounts.isEmpty()) {
+            log.info("No transfer records found for user {} on {}, checking recent days", userId, today);
+            return getRecentAverageAmount(userId);
+        }
+
+        log.info("All amounts for {}: {}", userId, amounts);
+
+        double average = amounts.stream()
+                .mapToDouble(Double::doubleValue)
+                .average()
+                .orElse(0.0);
+
+        log.info("User {} today's average transfer amount: {} (based on {} transfers)",
+                userId, average, amounts.size());
+
+        return average;
+    }
+
+    private double getRecentAverageAmount(String userId) {
+        // 최근 7일 동안 데이터 확인
+        for (int daysAgo = 1; daysAgo <= 7; daysAgo++) {
+            String targetDate = LocalDate.now().minusDays(daysAgo).format(DATE_FORMATTER);
+            String logFileName = LOG_DIR + "/fds-" + targetDate + ".json";
+
+            File logFile = new File(logFileName);
+            if (!logFile.exists()) {
+                log.debug("Log file not found for {} days ago: {}", daysAgo, logFileName);
+                continue;
+            }
+
+            List<Double> amounts = new ArrayList<>();
+
+            try (BufferedReader reader = new BufferedReader(new FileReader(logFile))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    try {
+                        JsonNode node = objectMapper.readTree(line);
+
+                        if ("TRANSFER".equals(node.path("eventType").asText()) &&
+                                userId.equals(node.path("userId").asText())) {
+
+                            String amountStr = node.path("amount").asText();
+                            if (!amountStr.isEmpty()) {
+                                double amount = Double.parseDouble(amountStr);
+                                amounts.add(amount);
+                            }
+                        }
+                    } catch (Exception e) {
+                        log.debug("Failed to parse log line: {}", line);
+                    }
+                }
+            } catch (Exception e) {
+                log.error("Error reading log file: {}", logFileName, e);
+                continue;
+            }
+
+            if (!amounts.isEmpty()) {
+                double average = amounts.stream()
+                        .mapToDouble(Double::doubleValue)
+                        .average()
+                        .orElse(0.0);
+
+                log.info("User {} recent average transfer amount from {} ({} days ago): {} (based on {} transfers)",
+                        userId, targetDate, daysAgo, average, amounts.size());
+
+                return average;
+            }
+        }
+
+        log.info("No transfer records found for user {} in recent 7 days", userId);
+        return 0.0;
+    }
+
+    public Map<String, Object> processTransfer(String userId, Long amount, String country, Boolean verified, HttpServletRequest request, double avgAmount) {
         ZonedDateTime now = ZonedDateTime.now();
         String normalizedCountry = normalizeCountry(country);
         String srcIp = getClientIp(request, normalizedCountry);
@@ -62,11 +185,23 @@ public class TransferService {
         }
 
         // 3. 정상 처리
-        sendTransferEvent(userId, amount, normalizedCountry, srcIp, now);
+        sendTransferEvent(userId, amount, normalizedCountry, srcIp, now, avgAmount);
 
-        log.info("TRANSFER_SUCCESS userId={} amount={} country={} srcIp={} timestamp={} toBank={} riskLevel={}",
-                userId, amount, normalizedCountry, srcIp, now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
-                SAMPLE_TO_BANK, riskLevel);
+        // 송금 성공 시에만 ELK 로그
+        try {
+            MDC.put("eventType", "TRANSFER");
+            MDC.put("userId", userId);
+            MDC.put("amount", String.valueOf(amount));
+            MDC.put("country", normalizedCountry);
+            MDC.put("srcIp", srcIp);
+            MDC.put("riskLevel", riskLevel);
+            MDC.put("toBank", SAMPLE_TO_BANK);
+            MDC.put("timestamp", now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME));
+
+            elkLog.info("TRANSFER_SUCCESS");
+        } finally {
+            MDC.clear();
+        }
 
         return Map.of(
                 "status", RESULT_SUCCESS,
@@ -128,7 +263,7 @@ public class TransferService {
         }
     }
 
-    private void sendTransferEvent(String userId, Long amount, String country, String srcIp, ZonedDateTime now) {
+    private void sendTransferEvent(String userId, Long amount, String country, String srcIp, ZonedDateTime now, double avgAmount) {
         FdsEvent event = new FdsEvent(
                 now.format(DateTimeFormatter.ISO_OFFSET_DATE_TIME),
                 "TRANSFER",
@@ -140,7 +275,8 @@ public class TransferService {
                 now.getHour(),
                 amount,
                 SAMPLE_TO_BANK,
-                SAMPLE_TO_ACCOUNT_ID
+                SAMPLE_TO_ACCOUNT_ID,
+                avgAmount
         );
         eventSender.send(event);
     }

@@ -24,6 +24,8 @@ public record FdsEvent(
         @JsonProperty("to_bank")
         String toBank,
         @JsonProperty("to_account_id")
-        String toAccountId
+        String toAccountId,
+        @JsonProperty("avgAmount")
+        double avgAmount
 ) {}
 
