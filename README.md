@@ -44,11 +44,11 @@ n8n을 활용하여 **금융 서비스에서 발생하는 로그인 및 거래 �
 
 ---
 
-## 프로젝트 배경
+## ⛳ 프로젝트 배경
 
 🛡️ 이상거래 탐지(FDS)의 의무화와 중요성
 
-최근 금융권 및 가상자산 시장을 타겟으로 한 보안 사고가 급증함에 따라, 이상거래탐지시스템(FDS) 도입이 자율에서 의무화로 강화되는 추세입니다. 보안 사고는 발생 후 조치보다 선제적 탐지와 신속한 초기 대응이 피해 규모를 결정짓는 핵심 요소입니다.
+최근 금융권 및 가상자산 시장을 타겟으로 한 보안 사고가 급증함에 따라 이상거래탐지시스템(FDS) 도입이 자율에서 의무화로 강화되는 추세다. 그리고 보안 사고는 선제적 탐지와 신속한 초기 대응이 피해 규모를 결정짓는 핵심 요소이기 때문에 FDS의 중요성은 날이 갈수록 커지고 있다.
 
 ### [관련 뉴스]
 <img width="600" height="300" alt="image" src="https://github.com/user-attachments/assets/ab2642f5-a6be-427d-bffe-1190e9d49ea5" />
@@ -90,7 +90,7 @@ n8n을 활용하여 **금융 서비스에서 발생하는 로그인 및 거래 �
 | Java(Spring Boot) | 로그인/송금 기능, 이벤트 생성 |
 | n8n | 이벤트 수집, 점수화, 판단, 대응 자동화 |
 | Google Sheets | 룰셋(조건/점수) 관리 |
-| DB / ES (선택) | 이상 이벤트 저장 및 조회 |
+| ELK 스택 | 로그 저장 및 시각화 |
 | Slack | 관리자 알림 |
 | AI Agent | 상황 요약 보고서 작성 |
 
@@ -107,12 +107,11 @@ n8n을 활용하여 **금융 서비스에서 발생하는 로그인 및 거래 �
 ### Automation
 
 - n8n
-- Webhook / Code / IF / HTTP Request 노드
 
 ### Storage
 
 - Google Sheets (Rule Management)
-- Redis / Elasticsearch (Anomaly Logs, Optional)
+- Redis / Elasticsearch (+Kibana)
 
 ### Notification
 
@@ -131,7 +130,25 @@ n8n을 활용하여 **금융 서비스에서 발생하는 로그인 및 거래 �
 
 - 로그인 성공/실패
 - 송금 요청
-- IP, User-Agent, 금액, 시간 정보 포함
+- IP, 접속 국가, 금액, 시간 정보 포함
+  
+  예시 이벤트 로그:
+  ```json
+  {
+    "ts": "2026-01-11T18:06:30+09:00",
+    "event_type": "TRANSFER",
+    "event_id": "0c0f6e5c-0f7c-4b3d-8f2f-8b8df7a4b9d1",
+    "user_id": "user_01",
+    "result": "SUCCESS",
+    "src_ip": "203.0.113.10",
+    "country": "US",
+    "hour": 18,
+    "amount": 5500000,
+    "to_bank": "Woori",
+    "to_account_id": "110-***-1234"
+  }
+
+  ```
 
 ### 🧮 룰 기반 점수화 (Rule-based Scoring)
 
@@ -164,14 +181,14 @@ n8n을 활용하여 **금융 서비스에서 발생하는 로그인 및 거래 �
 | HIGH | 로그 저장 + Slack 알림 + 거래 차단 |
 
 
-### 🗂️ 이상 로그 관리
+### 🗂️ 이상 로그 시각화
 
-- 이상 이벤트만 별도로 저장
+- Kibana로 로그의 이상치 시각화
 - 관리자가 빠르게 확인 가능
 
 ---
 ## 🎯 n8n 워크플로우
-
+<!-- n8n 워크플로우 설명-->
 
 ## 🔁 n8n 활용 포인트 (Why n8n?)
 
@@ -180,26 +197,6 @@ n8n을 활용하여 **금융 서비스에서 발생하는 로그인 및 거래 �
 <img width="960" height="774" alt="image" src="https://github.com/user-attachments/assets/8410b8a7-a0fe-4349-9609-60ef4db36592" />
 
 
----
-
-## 📄 예시 이벤트 로그 (Sample Event)
-
-```json
-{
-"ts": "2026-01-11T18:06:30+09:00",
-"event_type": "TRANSFER",
-"event_id": "0c0f6e5c-0f7c-4b3d-8f2f-8b8df7a4b9d1",
-"user_id": "user_01",
-"result": "SUCCESS",
-"src_ip": "203.0.113.10",
-"country": "US",
-"hour": 18,
-"amount": 5500000,
-"to_bank": "Woori",
-"to_account_id": "110-***-1234"
-}
-
-```
 
 ---
 
