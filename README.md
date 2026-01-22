@@ -80,7 +80,7 @@ n8n을 활용하여 **금융 서비스에서 발생하는 로그인 및 거래 �
 
 ## 🗃️ 시스템 아키텍처
 
-<img width="2702" height="1563" alt="image" src="https://github.com/user-attachments/assets/dc7cccfc-2d93-4256-aa99-266d1ea9868e" />
+<img width="1519" height="765" alt="image" src="https://github.com/user-attachments/assets/c5d11ebc-d3e0-41bd-832f-bfb4f1467306" />
 
 
 ### 구성 요소 역할
