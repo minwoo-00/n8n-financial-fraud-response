@@ -195,10 +195,187 @@ n8n을 활용하여 **금융 서비스에서 발생하는 로그인 및 거래 �
 
 본 프로젝트에서 **n8n은 단순 알림 도구가 아니라 중앙 판단 엔진** 역할을 수행한다.
 
-<img width="960" height="774" alt="image" src="https://github.com/user-attachments/assets/8410b8a7-a0fe-4349-9609-60ef4db36592" />
+<img width="960" height="774" alt="image" src="https://github.com/user-attachments/assets/8410b8a7-a0fe-4349-9609-60ef4db36592" /><br><br>
 
 
-<img width="1430" height="599" alt="Image" src="https://github.com/user-attachments/assets/5b9835c0-9535-4cd7-aa64-745a14b8d5b1" />
+## n8n 동작 과정
+<img width="1430" height="599" alt="Image" src="https://github.com/user-attachments/assets/5b9835c0-9535-4cd7-aa64-745a14b8d5b1" /><br>
+1. webhook을 통해 서버에서 보낸 json 데이터들을 받음
+2. 다음 정보들을 merge 노드를 사용하여 취합함
+   - server에서 보내 webhook에서 받은 json 데이터
+   - redis에서 송금 횟수 조회
+   - rule_set 시트 조회
+   - user_risk_statement 조회
+3. 취합한 정보들을 사용하여 위험도를 계산함
+   - 위험도 >= 70 이면 HIGH risk_level
+   - 위험도 >= 40 이면 MEDIUM risk_level
+   - 이하 LOW risk_level
+4. risk_level에 따라 다음 동작들을 수행함
+   - HIGH risk_level
+     - 서버로 risk_level=HIGH 전달
+     - user_risk_statement 초기화
+     - AI agent를 통한 위험 요인 분석 및 요약
+     - 슬랙으로 분석 내용 전달 및 redis 초기화
+   - MEDIUM risk_level
+     - user_risk_statement 최신화
+     - 서버로 risk_level=MEDIUM 전달
+   
+---
+
+## java 프로젝트
+
+### 구조
+
+```
+fds/
+├── config/
+│   ├── AppConfig 
+│   ├── RedisConfig 
+│   └── WebClientConfig 
+│
+├── controller/
+│   ├── AuthController 
+│   ├── TransferController 
+│   └── UserController 
+│
+├── dto/
+│   ├── FdsEvent 
+│   ├── LoginRequest 
+│   ├── TransferRequest 
+│   └── User 
+│
+├── service/
+│   ├── AuthService 
+│   ├── EventSender 
+│   └── TransferService 
+│
+└── FdsApplication 
+
+resources/
+├── static/ - 정적 파일 (JS, CSS, HTML)
+├── application.yml - Spring Boot 설정 파일
+├── google-credential.json - (제외)
+└── logback-spring.xml - 로깅 설정
+```
+
+### 기능별 설명
+1. Config
+   - AppConfig
+     - 애플리케이션 전역에 Bean 설정
+   - RedisConfig
+     - Redis 연결 및 캐시 설정
+   - WebClientConfig
+     - 외부 API 호출을 위한 HTTP 클라이언트 설정
+2. Controller
+   - AuthController
+     - 인증과 관련된 HTTP 요청 처리
+     - LoginRequest 받아서 AuthService로 전달
+   - TransferController
+     - 송금 관련 HTTP 요청 처리
+     - TransferRequest 받아서 TransferService로 전달
+   - UserController
+     - 사용자 정보, 차단 여부 조회 등 사용자 관리 관련 HTTP 요청 처리
+3. DTO
+   - FdsEvent : 이벤트 요청 데이터
+     - 필드
+       - eventType : Login, Transfer, Block
+       - userId : 사용자 ID
+       - timestamp : 이벤트 발생 시간
+       - srcIP : 접속 IP
+       - country : 접속 국가
+       - riskLevel : LOW / MEDIUM / HIGH
+       - amount : 송금액
+       - toBank : 수취 은행
+       - avgAmount : 평균 송금액
+   - LoginRequest : 로그인 요청 데이터
+     - 필드
+       - userId : 로그인할 사용자 ID
+       - password : 비밀번호
+       - country : 접속 국가
+   - TransferRequest : 송금 요청 데이터
+     - userId : 송금 사용자 ID
+     - amount : 송금액
+     - country : 접속 국가
+   - User : 사용자 정보
+     - Id 
+     - password
+     - blocked : 차단 상태 여부
+4. service : 비즈니스 로직
+   - AuthService : 로그인 관련  및 risk_level 가져오기
+   - EventSender : 이벤트를 webhook 노드로 전송
+   - TransferService : 송금 관련 비즈니스 로직 및 이상 거래 탐지
+      - 송금 전 검증
+      - 사용자 차단 여부 확인
+      - 사기 탐지 알고리즘**:
+          - 평균 송금액 대비 편차 계산
+          - 짧은 시간 내 다중 송금 감지
+            - 비정상 시간대 송금 체크
+      - 로그 파일 분석
+          - getTodayAverageAmount(): 오늘 평균 송금액 계산
+          - getRecentAverageAmount(): 최근 7일 내 평균 계산
+
+## 📁 resources
+
+  ### static :  정적 웹 파일
+    - app.js: 프론트엔드 JavaScript
+    - style.css: 스타일시트
+    - index.html: 메인 페이지
+
+  ### application.yml : Spring Boot 설정 파일
+    - redis 설정 : port=6379
+
+  ### logback-spring.xml : 로깅 설정
+    - **기능**:
+      - 로그 레벨 설정 (INFO, DEBUG, ERROR)
+      - 파일 로그 출력 경로
+      - 일별 로그 파일 생성 (fds-2026-01-23.json)
+
+---
+
+## 🔄 전체 흐름 예시
+
+### 1. 로그인 플로우
+```
+사용자 → AuthController → AuthService
+                              ↓
+                         위험도 분석
+                              ↓
+                    Redis 차단 여부 확인
+                              ↓
+                         EventSender
+                              ↓
+                      ELK + n8n + Sheets
+```
+
+### 2. 송금 플로우
+```
+사용자 → TransferController → TransferService
+                                   ↓
+                              사기 탐지 분석
+                                   ↓
+                            로그 파일에서 평균 계산
+                                   ↓
+                              위험도 점수 산출
+                                   ↓
+                              승인/거부/보류
+                                   ↓
+                              EventSender
+                                   ↓
+                           ELK + n8n + Sheets
+```
+
+### 3. 고위험 사용자 자동 차단
+```
+HIGH/CRITICAL 위험도 감지
+        ↓
+Redis에 차단 정보 저장
+        ↓
+n8n 워크플로우 트리거
+        ↓
+관리자 알림 (이메일, 슬랙 등)
+        ↓
+Google Sheets에 차단 기록
+```
 
 ---
 
