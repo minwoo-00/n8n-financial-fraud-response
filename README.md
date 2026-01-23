@@ -194,11 +194,11 @@ n8n을 활용하여 **금융 서비스에서 발생하는 로그인 및 거래 �
 ## 🗃️ java 프로젝트
 
 ### 서비스 화면
-![Image](https://github.com/user-attachments/assets/4bb868ab-8510-40bf-bc85-f471d06503cd)
-
-![Image](https://github.com/user-attachments/assets/f73d1c79-0920-49c1-aaa3-2ab96f72361c)
-
-![Image](https://github.com/user-attachments/assets/c410bc68-7212-4b81-bf89-0ad3c7cba686)
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/4bb868ab-8510-40bf-bc85-f471d06503cd" width="32%" />
+  <img src="https://github.com/user-attachments/assets/f73d1c79-0920-49c1-aaa3-2ab96f72361c" width="32%" />
+  <img src="https://github.com/user-attachments/assets/c410bc68-7212-4b81-bf89-0ad3c7cba686" width="32%" />
+</p>
 
 ### 구조
 
