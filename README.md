@@ -267,6 +267,7 @@ resources/
      - Redis 연결 및 캐시 설정
    - WebClientConfig
      - 외부 API 호출을 위한 HTTP 클라이언트 설정
+       
 2️. **Controller**
    - AuthController
      - 인증과 관련된 HTTP 요청 처리
@@ -276,6 +277,7 @@ resources/
      - TransferRequest 받아서 TransferService로 전달
    - UserController
      - 사용자 정보, 차단 여부 조회 등 사용자 관리 관련 HTTP 요청 처리
+       
 3️. **DTO**
    - FdsEvent : 이벤트 요청 데이터
      - 필드
@@ -301,6 +303,7 @@ resources/
      - Id 
      - password
      - blocked : 차단 상태 여부
+       
 4️. **service : 비즈니스 로직**
    - AuthService : 로그인 관련  및 risk_level 가져오기
    - EventSender : 이벤트를 webhook 노드로 전송
