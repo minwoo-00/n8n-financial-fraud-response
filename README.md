@@ -98,24 +98,17 @@ n8n을 활용하여 **금융 서비스에서 발생하는 로그인 및 거래 �
 
 ## 🛠️ 기술 스택 (Tech Stack)
 
-### Backend
-
-- Java 17
-- Spring Boot
-- REST API
-
-### Automation
-
-- n8n
-
-### Storage
-
-- Google Sheets (Rule Management)
-- Redis / Elasticsearch (+Kibana)
-
-### Notification
-
-- Slack Webhook
+| Category | Tech | Icon |
+|:--|:--|:--:|
+| Backend | Java 17 | <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/java/java-original.svg" width="28"/> |
+| Backend | Spring Boot | <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/spring/spring-original.svg" width="28"/> |
+| Backend | REST API | 🌐 |
+| Automation | n8n | <img src="https://avatars.githubusercontent.com/u/45487711?s=200&v=4" width="28"/> |
+| Storage | Google Sheets | <img src="https://cdn-icons-png.flaticon.com/512/281/281760.png" width="28"/> |
+| Storage | Redis | <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/redis/redis-original.svg" width="28"/> |
+| Storage | Elasticsearch | <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/elasticsearch/elasticsearch-original.svg" width="28"/> |
+| Storage | Kibana | <img src="https://www.vectorlogo.zone/logos/elasticco_kibana/elasticco_kibana-icon.svg" width="28"/> |
+| Notification | Slack Webhook | <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/slack/slack-original.svg" width="28"/> |
 
 ---
 
@@ -408,16 +401,6 @@ Google Sheets에 차단 기록
 - 대량의 데이터가 라벨 데이터가 존재한다면 모델을 학습시킨 후 추론을 통해 개인 패턴을 고려한 이상치를 탐지하는 방법으로 확장 가능
 
 
-| Category | Tech | Icon |
-|:--|:--|:--:|
-| Backend | Java 17 | <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/java/java-original.svg" width="28"/> |
-| Backend | Spring Boot | <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/spring/spring-original.svg" width="28"/> |
-| Backend | REST API | 🌐 |
-| Automation | n8n | <img src="https://avatars.githubusercontent.com/u/45487711?s=200&v=4" width="28"/> |
-| Storage | Google Sheets | <img src="https://cdn-icons-png.flaticon.com/512/281/281760.png" width="28"/> |
-| Storage | Redis | <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/redis/redis-original.svg" width="28"/> |
-| Storage | Elasticsearch | <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/elasticsearch/elasticsearch-original.svg" width="28"/> |
-| Storage | Kibana | <img src="https://www.vectorlogo.zone/logos/elasticco_kibana/elasticco_kibana-icon.svg" width="28"/> |
-| Notification | Slack Webhook | <img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/slack/slack-original.svg" width="28"/> |
+
 
 
