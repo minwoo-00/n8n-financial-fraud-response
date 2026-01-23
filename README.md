@@ -188,8 +188,6 @@ n8n을 활용하여 **금융 서비스에서 발생하는 로그인 및 거래 �
 <img width="1801" height="409" alt="Image" src="https://github.com/user-attachments/assets/54c2980b-2b6e-45ad-a46b-5f0d524383a6" />
 
 ---
-## 🎯 n8n 워크플로우
-<!-- n8n 워크플로우 설명-->
 
 ## 🔁 n8n 활용 포인트 (Why n8n?)
 
@@ -198,19 +196,22 @@ n8n을 활용하여 **금융 서비스에서 발생하는 로그인 및 거래 �
 <img width="960" height="774" alt="image" src="https://github.com/user-attachments/assets/8410b8a7-a0fe-4349-9609-60ef4db36592" /><br><br>
 
 
-## n8n 동작 과정
+## ⚙ n8n 동작 과정
 <img width="1430" height="599" alt="Image" src="https://github.com/user-attachments/assets/5b9835c0-9535-4cd7-aa64-745a14b8d5b1" /><br>
-1. webhook을 통해 서버에서 보낸 json 데이터들을 받음
-2. 다음 정보들을 merge 노드를 사용하여 취합함
+1️⃣ webhook을 통해 서버에서 보낸 json 데이터들을 받음
+
+2️⃣ 다음 정보들을 merge 노드를 사용하여 취합함
    - server에서 보내 webhook에서 받은 json 데이터
    - redis에서 송금 횟수 조회
    - rule_set 시트 조회
    - user_risk_statement 조회
-3. 취합한 정보들을 사용하여 위험도를 계산함
+     
+3️⃣ 취합한 정보들을 사용하여 위험도를 계산함
    - 위험도 >= 70 이면 HIGH risk_level
    - 위험도 >= 40 이면 MEDIUM risk_level
    - 이하 LOW risk_level
-4. risk_level에 따라 다음 동작들을 수행함
+     
+4️⃣ risk_level에 따라 다음 동작들을 수행함
    - HIGH risk_level
      - 서버로 risk_level=HIGH 전달
      - user_risk_statement 초기화
@@ -222,7 +223,7 @@ n8n을 활용하여 **금융 서비스에서 발생하는 로그인 및 거래 �
    
 ---
 
-## java 프로젝트
+## 🗃️ java 프로젝트
 
 ### 구조
 
@@ -259,14 +260,14 @@ resources/
 ```
 
 ### 기능별 설명
-1. Config
+1️. **Config**
    - AppConfig
      - 애플리케이션 전역에 Bean 설정
    - RedisConfig
      - Redis 연결 및 캐시 설정
    - WebClientConfig
      - 외부 API 호출을 위한 HTTP 클라이언트 설정
-2. Controller
+2️. **Controller**
    - AuthController
      - 인증과 관련된 HTTP 요청 처리
      - LoginRequest 받아서 AuthService로 전달
@@ -275,7 +276,7 @@ resources/
      - TransferRequest 받아서 TransferService로 전달
    - UserController
      - 사용자 정보, 차단 여부 조회 등 사용자 관리 관련 HTTP 요청 처리
-3. DTO
+3️. **DTO**
    - FdsEvent : 이벤트 요청 데이터
      - 필드
        - eventType : Login, Transfer, Block
@@ -300,7 +301,7 @@ resources/
      - Id 
      - password
      - blocked : 차단 상태 여부
-4. service : 비즈니스 로직
+4️. **service : 비즈니스 로직**
    - AuthService : 로그인 관련  및 risk_level 가져오기
    - EventSender : 이벤트를 webhook 노드로 전송
    - TransferService : 송금 관련 비즈니스 로직 및 이상 거래 탐지
@@ -334,7 +335,7 @@ resources/
 
 ## 🔄 전체 흐름 예시
 
-### 1. 로그인 플로우
+### 1️⃣ 로그인 플로우
 ```
 사용자 → AuthController → AuthService
                               ↓
@@ -347,7 +348,7 @@ resources/
                       ELK + n8n + Sheets
 ```
 
-### 2. 송금 플로우
+### 2️⃣ 송금 플로우
 ```
 사용자 → TransferController → TransferService
                                    ↓
@@ -364,7 +365,7 @@ resources/
                            ELK + n8n + Sheets
 ```
 
-### 3. 고위험 사용자 자동 차단
+### 3️⃣ 고위험 사용자 자동 차단
 ```
 HIGH/CRITICAL 위험도 감지
         ↓
@@ -380,11 +381,13 @@ Google Sheets에 차단 기록
 ---
 
 ## 🚧 트러블 슈팅
-- workflow에서 switch 노드를 여러 번 반복하는 문제가 발생하였었다
-  - 원인을 분석해보니 카테고리 명으로 분류되어 들어오는 input값이 2개여서 각각에 대해 동작을 수행하여 output이 2개로 나가고 있었다 
-  - 이를 해결하기 위해 merge 노드를 추가하여 하나로 모아주는 작업을 진행하였다
-- 키가 포함된 파일명을 변경하여 git.ignore에서 제외된 줄 모르고 commit을 했었다 
-  - 개인 정보가 github에 push될 뻔하였지만 github 시스템 덕분에 push가 안됐었다
+- **문제 상황** : workflow에서 switch 노드를 여러 번 반복하는 문제가 발생
+  - 원인 : 카테고리 명으로 분류되어 들어오는 input값이 2개여서 각각에 대해 동작을 수행하여 output이 2개로 나가고 있었다.
+  - 해결 : output을 1개로 만들기 위해 merge 노드를 추가하여 하나로 모아주는 작업을 진행하였다.
+    
+- **문제 상황** : GitHub에 API Key가 포함된 파일을 push할 뻔한 상황 발생
+  - 원인 : 파일명을 변경하여 .gitignore에서 제외되었고 이를 모른 채로 commit을 하게 되었다.
+  - 해결 : github 시스템 덕분에 push가 안되었고 .gitignore 파일 내의 파일명도 수정하였다.
 
 ---
 
@@ -396,13 +399,9 @@ Google Sheets에 차단 기록
 사전 차단이 어렵다는 한계 존재
 - 향후에는 송금 트랜잭션이 완료되기 전에 이상 여부를 판단하여 선제적으로 대응하는 구조로 확장 가능
 
-2️⃣ **AI 보조 판단 도입**
 
-- 룰 기반의 판단은 사용자별 거래 패턴을 충분히 고려하지 못하는 문제
-- 향후에는 더 정교한 이상 거래 탐지를 위해 기존의 룰 기반에 AI 기반 판단을 추가하는 구조로 확장 가능
-
-3️⃣ **룰 기반 -> 머신러닝 학습**
-- 현재는 룰을 기반으로 이상 패턴들을 탐지하고 있는데 이런 정적인 규칙으로 이상 패턴들을 탐지하는 데에는 한계가 존재함
-- 대량의 데이터가 라벨 데이터가 존재한다면 모델을 학습시킨 후 추론을 통해 이상치를 탐지하는 방법으로 확장 가능
+2️⃣ **룰 기반 -> 머신러닝 학습**
+- 현재의 룰 기반 탐지는 사용자별 이용 패턴을 고려하여 이상 패턴들을 탐지하는 데에 한계가 존재
+- 대량의 데이터가 라벨 데이터가 존재한다면 모델을 학습시킨 후 추론을 통해 개인 패턴을 고려한 이상치를 탐지하는 방법으로 확장 가능
 
 
