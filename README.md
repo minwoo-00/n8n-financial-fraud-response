@@ -230,7 +230,6 @@ fds/
 resources/
 ├── static/ - 정적 파일 (JS, CSS, HTML)
 ├── application.yml - Spring Boot 설정 파일
-├── google-credential.json - (제외)
 └── logback-spring.xml - 로깅 설정
 ```
 
