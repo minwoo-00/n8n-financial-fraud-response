@@ -340,7 +340,7 @@ resources/
                               ↓
                          위험도 분석
                               ↓
-                    Redis 차단 여부 확인
+                        차단 여부 확인
                               ↓
                          EventSender
                               ↓
@@ -368,7 +368,7 @@ resources/
 ```
 HIGH/CRITICAL 위험도 감지
         ↓
-Redis에 차단 정보 저장
+차단 정보 저장
         ↓
 n8n 워크플로우 트리거
         ↓
